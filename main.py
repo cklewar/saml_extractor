@@ -141,7 +141,7 @@ if __name__ == '__main__':
         data = get(base64.b64decode(args.string).decode("utf-8"))
 
     if data:
-        saml = run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, write_to_file=args.write, export_to_env=args.environment, print_to_stdout=args.print)
+        _saml = run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, write_to_file=args.write, export_to_env=args.environment, print_to_stdout=args.print)
 
         if args.update:
-            update(pat=args.pat, group="regression", saml=saml)
+            update(pat=args.pat, group="regression", saml=_saml)
