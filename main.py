@@ -1,3 +1,4 @@
+import argparse
 import base64
 import configparser
 import os
@@ -16,7 +17,7 @@ SESSION_ROLE = "Session Role"
 AWS_DEFAULT_CONFIG_PATH = "~/.aws/config"
 AWS_DEFAULT_CREDENTIALS_PATH = "~/.aws/credentials"
 SAML_DEFAULT_SESSION_DURATION = 3600
-Data = namedtuple("Data", "role_arn idp_arn raw")
+Data = namedtuple("Data", "role_arn idp_arn")
 
 
 def run(profile=None, region=None, session_duration=None, idp_arn=None, role_arn=None, saml=None):
@@ -91,25 +92,33 @@ def run(profile=None, region=None, session_duration=None, idp_arn=None, role_arn
         print(ete)
 
 
-def get(file: str) -> Data:
-    with open(file, "r") as fp:
-        raw = fp.read()
-        decoded = base64.b64decode(raw).decode("utf-8")
-
+def get(saml: str) -> Data:
     root = ET.fromstring(decoded)
-    _data = Data("", "", "")
+    _data = Data("", "")
 
     for item in root.iter(START_LEAF):
         if item.attrib["FriendlyName"] == SESSION_ROLE:
 
             for item1 in item.iter(SECOND_LEAF):
                 _tmp = item1.text.split(",")
-                _data = Data(_tmp[0], _tmp[1], raw)
+                _data = Data(_tmp[0], _tmp[1])
 
     return _data
 
 
 if __name__ == '__main__':
     print("SAMl ROLE_ARN and IDP_ARN extractor")
-    data = get("encoded")
-    run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=data.raw)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", help="base64 saml response file", type=str)
+    parser.add_argument("-s ", "--string", help="base64 saml response string", type=str)
+    args = parser.parse_args()
+
+    if args.file:
+        with open(args.file, "r") as fp:
+            raw = fp.read()
+        data = get(base64.b64decode(raw).decode("utf-8"))
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=raw)
+
+    if args.string:
+        data = get(base64.b64decode(args.string).decode("utf-8"))
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string)
