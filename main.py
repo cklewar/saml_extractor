@@ -20,7 +20,7 @@ SAML_DEFAULT_SESSION_DURATION = 3600
 Data = namedtuple("Data", "role_arn idp_arn")
 
 
-def run(profile=None, region=None, session_duration=None, idp_arn=None, role_arn=None, saml=None):
+def run(profile=None, region: str = None, session_duration: int = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False):
     profile_name = profile or os.environ.get("AWS_PROFILE", "default")
     region_name = region or os.environ.get("AWS_DEFAULT_REGION", None)
     section_name = (
@@ -66,27 +66,25 @@ def run(profile=None, region=None, session_duration=None, idp_arn=None, role_arn
                 cred.set(profile_name, "region", region_name)
             else:
                 cred.remove_option(profile_name, "region")
-            cred.set(
-                profile_name,
-                "aws_secret_access_key",
-                response["Credentials"]["SecretAccessKey"],
-            )
+
+            cred.set(profile_name, "aws_secret_access_key", response["Credentials"]["SecretAccessKey"])
             cred.set(profile_name, "aws_session_token", response["Credentials"]["SessionToken"])
             # Duplicate aws_session_token to aws_security_token to support legacy AWS clients.
-            cred.set(
-                profile_name, "aws_security_token", response["Credentials"]["SessionToken"]
-            )
+            cred.set(profile_name, "aws_security_token", response["Credentials"]["SessionToken"])
+            cred.set(profile_name, "aws_session_expiration", response["Credentials"]["Expiration"].strftime("%Y-%m-%dT%H:%M:%S%z"))
 
-            cred.set(
-                profile_name,
-                "aws_session_expiration",
-                response["Credentials"]["Expiration"].strftime("%Y-%m-%dT%H:%M:%S%z"),
-            )
-
-            with open(cred_path, "w+") as f:
-                cred.write(f)
-
-            print("Credentials saved for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
+            if write_to_file:
+                with open(cred_path, "w+") as f:
+                    cred.write(f)
+                    print("Credentials saved for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
+            elif export_to_env:
+                os.environ['AWS_ACCESS_KEY_ID'] = cred.get(profile_name, "aws_access_key_id")
+                os.environ['AWS_SESSION_TOKEN'] = cred.get(profile_name, "aws_session_token")
+                os.environ['AWS_SECRET_ACCESS_KEY'] = cred.get(profile_name, "aws_session_token")
+                print("AWS_ACCESS_KEY_ID:", os.getenv("AWS_ACCESS_KEY_ID"))
+                print("AWS_SESSION_TOKEN:", os.getenv("AWS_SESSION_TOKEN"))
+                print("AWS_SECRET_ACCESS_KEY:", os.getenv("AWS_SECRET_ACCESS_KEY"))
+                print("Credentials exported for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
 
     except botocore.errorfactory.ClientError as ete:
         print(ete)
@@ -110,15 +108,17 @@ if __name__ == '__main__':
     print("SAMl ROLE_ARN and IDP_ARN extractor")
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="base64 saml response file", type=str)
-    parser.add_argument("-s ", "--string", help="base64 saml response string", type=str)
+    parser.add_argument("-s", "--string", help="base64 saml response string", type=str)
+    parser.add_argument("-e", "--environment", help="export environment vars", type=bool)
+    parser.add_argument("-w", "--write", help="write credentials file", type=bool)
     args = parser.parse_args()
 
     if args.file:
         with open(args.file, "r") as fp:
             raw = fp.read()
         data = get(base64.b64decode(raw).decode("utf-8"))
-        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=raw)
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=raw, export_to_env=args.environment, write_to_file=args.write)
 
     if args.string:
         data = get(base64.b64decode(args.string).decode("utf-8"))
-        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string)
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string, export_to_env=args.environment, write_to_file=args.write)
