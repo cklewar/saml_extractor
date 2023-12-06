@@ -16,7 +16,7 @@ SECOND_LEAF = "{urn:oasis:names:tc:SAML:2.0:assertion}AttributeValue"
 SESSION_ROLE = "Session Role"
 AWS_DEFAULT_CONFIG_PATH = "~/.aws/config"
 AWS_DEFAULT_CREDENTIALS_PATH = "~/.aws/credentials"
-SAML_DEFAULT_SESSION_DURATION = 3600
+SAML_DEFAULT_SESSION_DURATION = 43200
 Data = namedtuple("Data", "role_arn idp_arn")
 
 
@@ -31,8 +31,7 @@ def run(profile=None, region: str = None, session_duration: int = None, idp_arn:
     config.read(config_path)
 
     try:
-        session_duration = session_duration or config.getint(
-            section_name, "saml.session_duration")
+        session_duration = session_duration or config.getint(section_name, "saml.session_duration")
     except configparser.NoOptionError:
         session_duration = SAML_DEFAULT_SESSION_DURATION
 
@@ -119,5 +118,4 @@ if __name__ == '__main__':
 
     if args.string:
         data = get(base64.b64decode(args.string).decode("utf-8"))
-        print(data.role_arn, data.idp_arn)
-        # run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string, export_to_env=args.environment, write_to_file=args.write)
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string, export_to_env=args.environment, write_to_file=args.write)
