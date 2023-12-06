@@ -64,9 +64,9 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
                 os.environ['AWS_ACCESS_KEY_ID'] = cred.get(profile_name, "aws_access_key_id")
                 os.environ['AWS_SESSION_TOKEN'] = cred.get(profile_name, "aws_session_token")
                 os.environ['AWS_SECRET_ACCESS_KEY'] = cred.get(profile_name, "aws_session_token")
-                print("AWS_ACCESS_KEY_ID:", os.getenv("AWS_ACCESS_KEY_ID"))
-                print("AWS_SESSION_TOKEN:", os.getenv("AWS_SESSION_TOKEN"))
-                print("AWS_SECRET_ACCESS_KEY:", os.getenv("AWS_SECRET_ACCESS_KEY"))
+                # print("AWS_ACCESS_KEY_ID:", os.getenv("AWS_ACCESS_KEY_ID"))
+                # print("AWS_SESSION_TOKEN:", os.getenv("AWS_SESSION_TOKEN"))
+                # print("AWS_SECRET_ACCESS_KEY:", os.getenv("AWS_SECRET_ACCESS_KEY"))
                 print("Credentials exported for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
 
     except botocore.errorfactory.ClientError as ete:
