@@ -23,10 +23,7 @@ Data = namedtuple("Data", "role_arn idp_arn")
 def run(profile=None, region: str = None, session_duration: int = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False):
     profile_name = profile or os.environ.get("AWS_PROFILE", "default")
     region_name = region or os.environ.get("AWS_DEFAULT_REGION", None)
-    section_name = (
-        profile_name if profile_name == "default" else "profile {}".format(profile_name)
-    )
-
+    section_name = (profile_name if profile_name == "default" else "profile {}".format(profile_name))
     config_path = os.environ.get("AWS_CONFIG_FILE") or os.path.expanduser(AWS_DEFAULT_CONFIG_PATH)
     cred_path = os.environ.get("AWS_SHARED_CREDENTIALS_FILE") or os.path.expanduser(AWS_DEFAULT_CREDENTIALS_PATH)
 
@@ -41,6 +38,7 @@ def run(profile=None, region: str = None, session_duration: int = None, idp_arn:
 
     principal_arn = idp_arn or config.get(section_name, "saml.idp_arn")
     role_arn = role_arn or config.get(section_name, "saml.role_arn")
+
     try:
         region_name = region_name or config.get(section_name, "region")
     except configparser.NoOptionError:
