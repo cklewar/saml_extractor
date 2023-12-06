@@ -1,5 +1,6 @@
 attrs==23.1.0
 boto3==1.33.7
+python-gitlab==3.14.0
 botocore==1.33.7
 certifi==2023.11.17
 h11==0.14.0
