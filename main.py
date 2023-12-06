@@ -20,7 +20,7 @@ SAML_DEFAULT_SESSION_DURATION = 43200
 Data = namedtuple("Data", "role_arn idp_arn")
 
 
-def run(profile=None, region: str = None, session_duration: int = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False):
+def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False):
     profile_name = profile or os.environ.get("AWS_PROFILE", "default")
     region_name = region or os.environ.get("AWS_DEFAULT_REGION", None)
     section_name = (profile_name if profile_name == "default" else f"profile {profile_name}")
@@ -31,7 +31,7 @@ def run(profile=None, region: str = None, session_duration: int = None, idp_arn:
     config.read(config_path)
 
     try:
-        session_duration = session_duration or config.getint(section_name, "saml.session_duration")
+        session_duration = SAML_DEFAULT_SESSION_DURATION or config.getint(section_name, "saml.session_duration")
     except configparser.NoOptionError:
         session_duration = SAML_DEFAULT_SESSION_DURATION
 
@@ -117,8 +117,8 @@ if __name__ == '__main__':
         with open(args.file, "r") as fp:
             raw = fp.read()
         data = get(base64.b64decode(raw).decode("utf-8"))
-        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=raw, export_to_env=args.environment, write_to_file=args.write)
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=raw, write_to_file=args.write)
 
     if args.string:
         data = get(base64.b64decode(args.string).decode("utf-8"))
-        run(idp_arn=data.idp_arn, role_arn=data.role_arn, session_duration=43200, saml=args.string, export_to_env=args.environment, write_to_file=args.write)
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, export_to_env=args.environment)
