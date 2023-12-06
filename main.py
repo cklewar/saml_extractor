@@ -93,7 +93,7 @@ def run(profile=None, region=None, session_duration=None, idp_arn=None, role_arn
 
 
 def get(saml: str) -> Data:
-    root = ET.fromstring(decoded)
+    root = ET.fromstring(saml)
     _data = Data("", "")
 
     for item in root.iter(START_LEAF):
