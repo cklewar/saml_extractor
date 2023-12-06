@@ -26,19 +26,11 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
     section_name = (profile_name if profile_name == "default" else f"profile {profile_name}")
     config_path = os.environ.get("AWS_CONFIG_FILE") or os.path.expanduser(AWS_DEFAULT_CONFIG_PATH)
     cred_path = os.environ.get("AWS_SHARED_CREDENTIALS_FILE") or os.path.expanduser(AWS_DEFAULT_CREDENTIALS_PATH)
-
     config = configparser.RawConfigParser()
     config.read(config_path)
-
-    try:
-        session_duration = SAML_DEFAULT_SESSION_DURATION or config.getint(section_name, "saml.session_duration")
-    except configparser.NoOptionError:
-        session_duration = SAML_DEFAULT_SESSION_DURATION
-
+    session_duration = config.getint(section_name, "saml.session_duration") if config.has_option(section_name, "saml.session_duration") else SAML_DEFAULT_SESSION_DURATION
     principal_arn = idp_arn or config.get(section_name, "saml.idp_arn")
     role_arn = role_arn or config.get(section_name, "saml.role_arn")
-    print("REGION_NAME:", region_name)
-    print("REGION_NAME_CFG:", config.get(section_name, "region") if config.has_option(section_name, "region") else "no region option")
     region_name = config.get(section_name, "region") if config.has_option(section_name, "region") else region_name
 
     try:
