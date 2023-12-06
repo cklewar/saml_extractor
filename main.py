@@ -39,13 +39,13 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
     role_arn = role_arn or config.get(section_name, "saml.role_arn")
 
     try:
-        print("CFG:", config)
+        print("ITEMS:", config.items())
         print("REGION_NAME:", region_name)
         print("REGION_NAME_CFG:", config.get(section_name, "region"))
+
         region_name = region_name if region_name else config.get(section_name, "region")
     except configparser.NoOptionError:
         region_name = region_name
-
 
     try:
         sts = boto3.client("sts", config=botocore.config.Config(signature_version=botocore.UNSIGNED))
@@ -63,11 +63,7 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
                 cred.add_section(profile_name)
 
             cred.set(profile_name, "aws_access_key_id", response["Credentials"]["AccessKeyId"])
-            if region_name is not None:
-                cred.set(profile_name, "region", region_name)
-            else:
-                cred.remove_option(profile_name, "region")
-
+            cred.set(profile_name, "region", region_name) if region_name else cred.remove_option(profile_name, "region")
             cred.set(profile_name, "aws_secret_access_key", response["Credentials"]["SecretAccessKey"])
             cred.set(profile_name, "aws_session_token", response["Credentials"]["SessionToken"])
             # Duplicate aws_session_token to aws_security_token to support legacy AWS clients.
