@@ -20,7 +20,7 @@ SAML_DEFAULT_SESSION_DURATION = 43200
 Data = namedtuple("Data", "role_arn idp_arn")
 
 
-def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False):
+def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = None, saml: str = None, write_to_file: bool = False, export_to_env: bool = False, print_to_stdout: bool = False):
     profile_name = profile or os.environ.get("AWS_PROFILE", "default")
     region_name = region or os.environ.get("AWS_DEFAULT_REGION", None)
     section_name = (profile_name if profile_name == "default" else f"profile {profile_name}")
@@ -64,9 +64,12 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
                 os.environ['AWS_ACCESS_KEY_ID'] = cred.get(profile_name, "aws_access_key_id")
                 os.environ['AWS_SESSION_TOKEN'] = cred.get(profile_name, "aws_session_token")
                 os.environ['AWS_SECRET_ACCESS_KEY'] = cred.get(profile_name, "aws_session_token")
-                print("AWS_ACCESS_KEY_ID:", os.getenv("AWS_ACCESS_KEY_ID"))
-                print("AWS_SESSION_TOKEN:", os.getenv("AWS_SESSION_TOKEN"))
-                print("AWS_SECRET_ACCESS_KEY:", os.getenv("AWS_SECRET_ACCESS_KEY"))
+
+                if print_to_stdout:
+                    print("AWS_ACCESS_KEY_ID:", os.getenv("AWS_ACCESS_KEY_ID"))
+                    print("AWS_SESSION_TOKEN:", os.getenv("AWS_SESSION_TOKEN"))
+                    print("AWS_SECRET_ACCESS_KEY:", os.getenv("AWS_SECRET_ACCESS_KEY"))
+
                 print("Credentials exported for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
 
     except botocore.errorfactory.ClientError as ete:
@@ -94,6 +97,7 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--string", help="base64 saml response string", type=str)
     parser.add_argument("-e", "--environment", help="export environment vars", type=bool)
     parser.add_argument("-w", "--write", help="write credentials file", type=bool)
+    parser.add_argument("-p", "--print", help="print credentials to stdout", type=bool)
     args = parser.parse_args()
 
     if args.file:
@@ -105,3 +109,7 @@ if __name__ == '__main__':
     if args.string:
         data = get(base64.b64decode(args.string).decode("utf-8"))
         run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, export_to_env=args.environment)
+
+    if args.print:
+        data = get(base64.b64decode(args.string).decode("utf-8"))
+        run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, print_to_stdout=args.print)
