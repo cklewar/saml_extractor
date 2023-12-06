@@ -39,7 +39,7 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
     role_arn = role_arn or config.get(section_name, "saml.role_arn")
     print("REGION_NAME:", region_name)
     print("REGION_NAME_CFG:", config.get(section_name, "region") if config.has_option(section_name, "region") else "no region option")
-    region_name = region_name if region_name else config.get(section_name, "region")
+    region_name = config.get(section_name, "region") if config.has_option(section_name, "region") else region_name
 
     try:
         sts = boto3.client("sts", config=botocore.config.Config(signature_version=botocore.UNSIGNED))
