@@ -42,9 +42,10 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
         print("CFG:", config)
         print("REGION_NAME:", region_name)
         print("REGION_NAME_CFG:", config.get(section_name, "region"))
-        region_name = region_name or config.get(section_name, "region")
+        region_name = region_name if region_name else config.get(section_name, "region")
     except configparser.NoOptionError:
-        pass
+        region_name = region_name
+
 
     try:
         sts = boto3.client("sts", config=botocore.config.Config(signature_version=botocore.UNSIGNED))
@@ -105,7 +106,7 @@ def get(saml: str) -> Data:
 
 
 if __name__ == '__main__':
-    print("SAMl ROLE_ARN and IDP_ARN extractor")
+    print("SAML ROLE_ARN and IDP_ARN extractor")
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="base64 saml response file", type=str)
     parser.add_argument("-s", "--string", help="base64 saml response string", type=str)
