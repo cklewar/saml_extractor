@@ -39,6 +39,9 @@ def run(profile=None, region: str = None, session_duration: int = None, idp_arn:
     role_arn = role_arn or config.get(section_name, "saml.role_arn")
 
     try:
+        print("CFG:", config)
+        print("REGION_NAME:", region_name)
+        print("REGION_NAME_CFG:", config.get(section_name, "region"))
         region_name = region_name or config.get(section_name, "region")
     except configparser.NoOptionError:
         pass
