@@ -13,8 +13,16 @@ This repository provides tool to get auth data from saml response and authentica
 ## Example
 
 ```bash
-python3 python3 main.py --file ./saml_file
+python3 -m pip install -r requirements.txt
+python3 main.py --file BASE64_ENCODED_STRING_FILE -u true -a GIT_PAT
 
-SAMl ROLE_ARN and IDP_ARN extractor
-Credentials saved for default. Expire 2023-12-06 17:36:10+00:00.
+SAML ROLE_ARN and IDP_ARN extractor
+Get group <regression> project <sense8> object...
+Get group <regression> project <sense8> object -> Done
+Update variable <aws_access_key_id>...
+Update variable <aws_access_key_id> -> DONE
+Update variable <aws_session_token>...
+Update variable <aws_session_token> -> DONE
+Update variable <aws_secret_access_key>...
+Update variable <aws_secret_access_key> -> DONE
 ```
