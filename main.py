@@ -131,17 +131,20 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--pat", help="Gitlab PAT", type=str)
     args = parser.parse_args()
     data = None
+    saml = None
 
     if args.file:
         with open(args.file, "r") as fp:
             raw = fp.read()
         data = get(base64.b64decode(raw).decode("utf-8"))
+        saml = raw
 
     if args.string:
         data = get(base64.b64decode(args.string).decode("utf-8"))
+        saml = args.string
 
     if data:
-        _saml = run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=args.string, write_to_file=args.write, export_to_env=args.environment, print_to_stdout=args.print)
+        _saml = run(idp_arn=data.idp_arn, role_arn=data.role_arn, saml=saml, write_to_file=args.write, export_to_env=args.environment, print_to_stdout=args.print)
 
         if args.update:
             update(pat=args.pat, group="regression", saml=_saml)
