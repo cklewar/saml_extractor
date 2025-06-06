@@ -72,6 +72,11 @@ def run(profile=None, region: str = None, idp_arn: str = None, role_arn: str = N
                 print("AWS_ACCESS_KEY_ID:", cred.get(profile_name, "aws_access_key_id"))
                 print("AWS_SESSION_TOKEN:", cred.get(profile_name, "aws_session_token"))
                 print("AWS_SECRET_ACCESS_KEY:", cred.get(profile_name, "aws_secret_access_key"))
+                print(f"export AWS_ACCESS_KEY_ID=\"{cred.get(profile_name, "aws_access_key_id")}\"", )
+                print(f"export AWS_SESSION_TOKEN=\"{cred.get(profile_name, "aws_session_token")}\"")
+                print(f"export AWS_SECRET_ACCESS_KEY=\"{cred.get(profile_name, "aws_secret_access_key")}\"")
+                print(f"export TF_VAR_aws_access_key_id=\"{cred.get(profile_name, "aws_access_key_id")}\"", )
+                print(f"export TF_VAR_aws_secret_access_key=\"{cred.get(profile_name, "aws_session_token")}\"")
                 print("Credentials for {}. Expire {}.".format(profile_name, response["Credentials"]["Expiration"]))
 
             return Saml(aws_access_key_id=cred.get(profile_name, "aws_access_key_id"),
